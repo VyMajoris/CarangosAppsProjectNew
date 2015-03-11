@@ -1,7 +1,9 @@
 package br.com.caelum.fj59.carangos.activity;
 
 import android.app.Activity;
+import android.app.FragmentTransaction;
 import android.os.Bundle;
+import android.text.style.TtsSpan;
 import android.util.Log;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -12,44 +14,79 @@ import java.util.List;
 import br.com.caelum.fj59.carangos.R;
 import br.com.caelum.fj59.carangos.adapter.BlogPostAdapter;
 import br.com.caelum.fj59.carangos.app.CarangosApplication;
+import br.com.caelum.fj59.carangos.fragments.ListaDePostsFragment;
+import br.com.caelum.fj59.carangos.fragments.ProgressFragment;
+import br.com.caelum.fj59.carangos.infra.MyLog;
 import br.com.caelum.fj59.carangos.interfaces.BuscaMaisPostsDelegate;
 import br.com.caelum.fj59.carangos.modelo.BlogPost;
+import br.com.caelum.fj59.carangos.navegacao.EstadoMainActivity;
 import br.com.caelum.fj59.carangos.tasks.BuscaMaisPostsTask;
 
 public class MainActivity extends Activity implements BuscaMaisPostsDelegate {
     private ListView postsList;
-    private List<BlogPost> posts;
-    private BlogPostAdapter adapter;
 
+    private BlogPostAdapter adapter;
+    private EstadoMainActivity estado;
+
+    private static final String ESTADO_ATUAL = "ESTADO_ATUAL";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.posts_list);
+        setContentView(R.layout.main);
 
-        this.postsList = (ListView) findViewById(R.id.posts_list);
-        this.posts = new ArrayList<BlogPost>();
-        this.adapter = new BlogPostAdapter(this, this.posts);
 
-        this.postsList.setAdapter(adapter);
 
-        new BuscaMaisPostsTask(this).execute();
-    }
+        this.estado = EstadoMainActivity.INICIO;
 
-    public void atualizaListaCom(List<BlogPost> posts) {
-        this.posts.clear();
-        this.posts.addAll(posts);
-        this.adapter.notifyDataSetChanged();
-    }
 
-    public List<BlogPost> getPosts() {
-        return this.posts;
+
     }
 
     @Override
-    public void lidaComRetorno(List<BlogPost> retorno) {
-        this.posts.clear();
-        this.posts.addAll(retorno);
-        this.adapter.notifyDataSetChanged();
+    protected void onResume(){
+        super.onResume();
+        MyLog.i("Executando Estado!" + this.estado);
+        this.estado.executa(this);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState){
+        super.onSaveInstanceState(outState);
+        MyLog.i("Salvando Estado!");
+
+        outState.putSerializable(ESTADO_ATUAL, this.estado);
+
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState){
+        super.onRestoreInstanceState(savedInstanceState);
+        MyLog.i("RESSTAURANDO ESTADO!");
+        this.estado = (EstadoMainActivity) savedInstanceState.getSerializable(ESTADO_ATUAL);
+    }
+
+
+
+//    public void atualizaListaCom(List<BlogPost> posts) {
+//
+//        this.posts.clear();
+//        this.posts.addAll(posts);
+//        this.adapter.notifyDataSetChanged();
+//    }
+
+    public void buscaPrimeirosPosts(){
+        new BuscaMaisPostsTask(this).execute();
+    }
+
+
+
+    @Override
+    public void lidaComRetorno(List<BlogPost> resultado) {
+        CarangosApplication application = (CarangosApplication) getApplication();
+        application.getPosts().clear();
+        application.getPosts().addAll(resultado);
+        this.estado = EstadoMainActivity.PRIMEIROS_POSTS_RECEBIDOS;
+        this.estado.executa(this);
     }
 
     @Override
@@ -61,5 +98,10 @@ public class MainActivity extends Activity implements BuscaMaisPostsDelegate {
     @Override
     public CarangosApplication getCarangosApplication() {
         return (CarangosApplication) getApplication();
+    }
+
+    public void alteraEstadoEExecuta(EstadoMainActivity estado) {
+        this.estado = estado;
+        this.estado.executa(this);
     }
 }
