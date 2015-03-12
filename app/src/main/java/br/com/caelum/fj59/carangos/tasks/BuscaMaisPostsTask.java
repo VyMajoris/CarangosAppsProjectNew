@@ -1,13 +1,16 @@
 package br.com.caelum.fj59.carangos.tasks;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 
 import java.util.List;
 
 import br.com.caelum.fj59.carangos.activity.MainActivity;
+import br.com.caelum.fj59.carangos.app.CarangosApplication;
 import br.com.caelum.fj59.carangos.converter.BlogPostConverter;
 import br.com.caelum.fj59.carangos.infra.MyLog;
 import br.com.caelum.fj59.carangos.interfaces.BuscaMaisPostsDelegate;
+import br.com.caelum.fj59.carangos.listeners.EventoBlogPostRecebidos;
 import br.com.caelum.fj59.carangos.modelo.BlogPost;
 import br.com.caelum.fj59.carangos.webservice.Pagina;
 import br.com.caelum.fj59.carangos.webservice.WebClient;
@@ -17,12 +20,14 @@ import br.com.caelum.fj59.carangos.webservice.WebClient;
  */
 public class BuscaMaisPostsTask extends AsyncTask<Pagina, Void, List<BlogPost>> {
 
-    private MainActivity activity;
-    private BuscaMaisPostsDelegate delegate;
+    private CarangosApplication application;
     private Exception erro;
-    public BuscaMaisPostsTask(BuscaMaisPostsDelegate delegate) {
-        this.delegate = delegate;
-        this.delegate.getCarangosApplication().registra(this);
+
+    public BuscaMaisPostsTask(CarangosApplication application) {
+
+        this.application = application;
+        application.registra(this);
+
 
 
     }
@@ -36,6 +41,9 @@ public class BuscaMaisPostsTask extends AsyncTask<Pagina, Void, List<BlogPost>> 
 
             List<BlogPost> postsRecebidos = new BlogPostConverter().toPosts(jsonDeResposta);
 
+
+
+
             return postsRecebidos;
         } catch (Exception e) {
             this.erro = e;
@@ -48,10 +56,10 @@ public class BuscaMaisPostsTask extends AsyncTask<Pagina, Void, List<BlogPost>> 
         MyLog.i("RETORNO OBTIDO!" + retorno);
 
         if (retorno!=null) {
-            this.delegate.lidaComRetorno(retorno);
+            EventoBlogPostRecebidos.notificaPostsRecebidos(this.application,retorno,true);
         } else {
-           this.delegate.listaComErro(this.erro);
+            EventoBlogPostRecebidos.notificaPostsRecebidos(this.application,retorno,false);
         }
-        delegate.getCarangosApplication().deregistra(this);
+        this.application.deregistra(this);
     }
 }

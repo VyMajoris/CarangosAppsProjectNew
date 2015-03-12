@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import java.util.ArrayList;
 import java.util.List;
 
+import br.com.caelum.fj59.carangos.interfaces.BuscaMaisPostsDelegate;
 import br.com.caelum.fj59.carangos.modelo.BlogPost;
 
 /**
@@ -34,6 +35,7 @@ public class CarangosApplication extends Application {
             task.cancel(true);
         }
     }
+
 
 
     public void registra(AsyncTask<?,?,?> task){

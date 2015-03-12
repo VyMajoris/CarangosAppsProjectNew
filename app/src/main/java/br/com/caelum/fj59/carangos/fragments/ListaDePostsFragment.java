@@ -14,11 +14,13 @@ import br.com.caelum.fj59.carangos.adapter.BlogPostAdapter;
 import br.com.caelum.fj59.carangos.app.CarangosApplication;
 import br.com.caelum.fj59.carangos.infra.MyLog;
 import br.com.caelum.fj59.carangos.modelo.BlogPost;
+import br.com.caelum.fj59.carangos.navegacao.EstadoMainActivity;
+import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
 
 /**
  * Created by erich on 9/11/13.
  */
-public class ListaDePostsFragment extends Fragment {
+public class ListaDePostsFragment extends Fragment implements PullToRefreshAttacher.OnRefreshListener{
     private ListView postsList;
     private BlogPostAdapter adapter;
 
@@ -27,12 +29,20 @@ public class ListaDePostsFragment extends Fragment {
         this.postsList = (ListView) inflater.inflate(R.layout.posts_list, container, false);
 
         final MainActivity activity = ((MainActivity)this.getActivity());
+
+        activity.getAttacher().addRefreshableView(this.postsList,this);
         CarangosApplication app = activity.getCarangosApplication();
-        
+
         this.adapter = new BlogPostAdapter(getActivity(),app.getPosts());
         this.postsList.setAdapter(this.adapter);
 
         return this.postsList;
     }
 
+    @Override
+    public void onRefreshStarted(View view) {
+        MainActivity activity = ((MainActivity)this.getActivity());
+        activity.alteraEstadoEExecuta(EstadoMainActivity.PULL_TO_REFRESH_REQUISITADO);
+        MyLog.i("Pull TO REFRESH INICIADO");
+    }
 }

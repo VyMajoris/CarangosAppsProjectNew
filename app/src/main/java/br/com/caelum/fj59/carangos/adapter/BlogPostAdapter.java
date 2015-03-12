@@ -9,6 +9,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 
+import com.koushikdutta.urlimageviewhelper.UrlImageViewHelper;
+
 import java.util.List;
 
 import br.com.caelum.fj59.carangos.R;
@@ -57,7 +59,8 @@ public class BlogPostAdapter extends BaseAdapter {
         mensagem.setText(blogPost.getMensagem());
         nomeAutor.setText(blogPost.getAutor().getNome());
         //TODO pegar placeholder decente...
-        foto.setImageDrawable(this.context.getResources().getDrawable(R.drawable.ic_car));
+        //foto.setImageDrawable(this.context.getResources().getDrawable(R.drawable.ic_car));
+        UrlImageViewHelper.setUrlDrawable(foto, blogPost.getFoto(), this.context.getResources().getDrawable(R.drawable.ic_car));
 
         int idImagem = 0;
         switch (blogPost.getEstadoDeHumor()) {

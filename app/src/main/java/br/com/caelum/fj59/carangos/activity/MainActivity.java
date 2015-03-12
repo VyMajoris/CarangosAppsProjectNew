@@ -18,9 +18,11 @@ import br.com.caelum.fj59.carangos.fragments.ListaDePostsFragment;
 import br.com.caelum.fj59.carangos.fragments.ProgressFragment;
 import br.com.caelum.fj59.carangos.infra.MyLog;
 import br.com.caelum.fj59.carangos.interfaces.BuscaMaisPostsDelegate;
+import br.com.caelum.fj59.carangos.listeners.EventoBlogPostRecebidos;
 import br.com.caelum.fj59.carangos.modelo.BlogPost;
 import br.com.caelum.fj59.carangos.navegacao.EstadoMainActivity;
 import br.com.caelum.fj59.carangos.tasks.BuscaMaisPostsTask;
+import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
 
 public class MainActivity extends Activity implements BuscaMaisPostsDelegate {
     private ListView postsList;
@@ -28,18 +30,24 @@ public class MainActivity extends Activity implements BuscaMaisPostsDelegate {
     private BlogPostAdapter adapter;
     private EstadoMainActivity estado;
 
+    private EventoBlogPostRecebidos evento;
+    private PullToRefreshAttacher attacher;
     private static final String ESTADO_ATUAL = "ESTADO_ATUAL";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-
-
         this.estado = EstadoMainActivity.INICIO;
+        this.evento = EventoBlogPostRecebidos.registraObservador(this);
+
+        this.attacher = PullToRefreshAttacher.get(this);
 
 
 
+    }
+    public PullToRefreshAttacher getAttacher(){
+        return  attacher;
     }
 
     @Override
@@ -47,6 +55,12 @@ public class MainActivity extends Activity implements BuscaMaisPostsDelegate {
         super.onResume();
         MyLog.i("Executando Estado!" + this.estado);
         this.estado.executa(this);
+    }
+
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        this.evento.desregistra(getCarangosApplication());
     }
 
     @Override
@@ -74,9 +88,11 @@ public class MainActivity extends Activity implements BuscaMaisPostsDelegate {
 //        this.adapter.notifyDataSetChanged();
 //    }
 
-    public void buscaPrimeirosPosts(){
-        new BuscaMaisPostsTask(this).execute();
+    public  void buscaPrimeirosPosts(){
+        new BuscaMaisPostsTask(getCarangosApplication()).execute();
+
     }
+
 
 
 
@@ -87,6 +103,7 @@ public class MainActivity extends Activity implements BuscaMaisPostsDelegate {
         application.getPosts().addAll(resultado);
         this.estado = EstadoMainActivity.PRIMEIROS_POSTS_RECEBIDOS;
         this.estado.executa(this);
+        this.attacher.setRefreshComplete();
     }
 
     @Override
