@@ -1,6 +1,7 @@
 package br.com.caelum.fj59.carangos.adapter;
 
 import android.content.Context;
+import android.location.Location;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,21 +47,54 @@ public class BlogPostAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup viewGroup) {
+        ViewHolder holder;
+        if(position % 2 == 0) {
+            if (convertView != null && convertView.findViewById(R.id.root_linha_par) !=null){
+                holder = (ViewHolder) convertView.getTag();
+                MyLog.i("Aproveitou cell par");
+            }else{
+                convertView = LayoutInflater.from(context).inflate(R.layout.post_linha_par, viewGroup,false);
+                     holder = new ViewHolder(convertView);
+                    convertView.setTag(holder);
+                    MyLog.i("Nao aprovietou PAR");
+            }
+        }else{
+            if (convertView != null && convertView.findViewById(R.id.root_linha_impar) != null){
+                holder = (ViewHolder) convertView.getTag();
+                MyLog.i("aproveitou cell impar");
+            }else{
+                convertView = LayoutInflater.from(context).inflate(R.layout.post_linha_impar, viewGroup,false);
+                holder = new ViewHolder(convertView);
+                convertView.setTag(holder);
+                MyLog.i("aproveitou cell impar");
+            }
+        }
+
+
+
+       /*
+       int layout = position % 2 == 0?
+                        R.layout.post_linha_par : R.layout.post_linha_impar;
+        holder = new ViewHolder(convertView);
+
+        if (convertView == null){
+
+            convertView = LayoutInflater.from(context).inflate(layout, viewGroup, false);
+            MyLog.i("Criou uma nova linha!!");
+
+        }else{
+            MyLog.i("Aproveitou uma linha");
+
+        }
+        */
+
         BlogPost blogPost = (BlogPost) getItem(position);
 
-        View linha = LayoutInflater.from(context).inflate(R.layout.
-                post_linha_par, null);
+        holder.mensagem.setText(blogPost.getMensagem());
+        holder.mensagem.setText(blogPost.getAutor().getNome());
 
-        ImageView foto = (ImageView) linha.findViewById(R.id.foto);
-        TextView mensagem = (TextView) linha.findViewById(R.id.mensagem);
-        TextView nomeAutor = (TextView) linha.findViewById(R.id.nome_autor);
-        ImageView emoticon = (ImageView) linha.findViewById(R.id.emoticon);
-
-        mensagem.setText(blogPost.getMensagem());
-        nomeAutor.setText(blogPost.getAutor().getNome());
-        //TODO pegar placeholder decente...
         //foto.setImageDrawable(this.context.getResources().getDrawable(R.drawable.ic_car));
-        UrlImageViewHelper.setUrlDrawable(foto, blogPost.getFoto(), this.context.getResources().getDrawable(R.drawable.ic_car));
+        UrlImageViewHelper.setUrlDrawable(holder.foto, blogPost.getFoto(), this.context.getResources().getDrawable(R.drawable.ic_car));
 
         int idImagem = 0;
         switch (blogPost.getEstadoDeHumor()) {
@@ -69,9 +103,9 @@ public class BlogPostAdapter extends BaseAdapter {
             case TRISTE: idImagem = R.drawable.ic_indiferente; break;
         }
 
-        emoticon.setImageDrawable(this.context.getResources().getDrawable(idImagem));
+        holder.emoticon.setImageDrawable(this.context.getResources().getDrawable(idImagem));
 
-        return linha;
+        return convertView;
     }
 
     @Override
