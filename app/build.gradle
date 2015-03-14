@@ -1,13 +1,13 @@
-apply plugin: 'com.android.application'
+apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 21
     buildToolsVersion "21.1.2"
 
     defaultConfig {
-        applicationId "br.com.vymajoris.carangosappsprojectnew"
-        minSdkVersion 11
-        targetSdkVersion 21
+
+        minSdkVersion 14
+        targetSdkVersion 19
         versionCode 1
         versionName "1.0"
         multiDexEnabled = true

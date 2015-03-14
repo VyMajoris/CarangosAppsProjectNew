@@ -1,16 +1,16 @@
 package br.com.caelum.fj59.carangos.infra;
 
+import android.app.Application;
 import android.os.Build;
+
+import br.com.caelum.fj59.carangos.R;
 
 public class MyServer {
     private static String uri;
 
-    static {
-        //if (taNoEmulador()) {
-        //    uri = "http://10.0.2.2:8080/%s";
-        //} else {
-			uri = "http://carangos.herokuapp.com/%s";
-        //}
+
+    public MyServer(Application application){
+        uri = application.getResources().getString(R.string.server_uri);
     }
 
     public static String uriFor(String value) {
